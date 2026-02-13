@@ -8,22 +8,71 @@
 body{
 margin:0;
 background:black;
+color:white;
+font-family:sans-serif;
+overflow:hidden;
+}
+
+.screen{
+position:absolute;
+width:100%;
+height:100%;
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
+flex-direction:column;
 }
+
+button{
+padding:15px 30px;
+margin:10px;
+font-size:20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+#museum{display:none;}
+
 canvas{
-box-shadow:0 0 40px rgba(255,255,255,0.2);
+display:block;
+margin:auto;
+background:#111;
+box-shadow:0 0 80px rgba(255,255,255,0.1);
 }
 </style>
 </head>
 
-<body onload="drawGallery()">
+<body>
 
+<div id="start" class="screen">
+<h1>ก่อนเข้าพิพิธภัณฑ์...</h1>
+<h2>เรายังรักกันไหม?</h2>
+<div>
+<button onclick="yes()">YES ❤️</button>
+<button onclick="no()">NO 😡</button>
+</div>
+<p id="angry"></p>
+</div>
+
+<div id="museum" class="screen">
 <canvas id="galleryCanvas" width="900" height="500"></canvas>
+</div>
 
 <script>
+
+function yes(){
+document.getElementById("start").style.display="none";
+document.getElementById("museum").style.display="flex";
+drawGallery();
+}
+
+function no(){
+document.getElementById("angry").innerHTML="😡 ลองตอบใหม่อีกที!";
+document.body.style.animation="shake 0.3s";
+setTimeout(()=>document.body.style.animation="",300);
+}
+
 let rosePetals=[];
 
 function drawGallery(){
@@ -31,25 +80,52 @@ function drawGallery(){
 const canvas=document.getElementById("galleryCanvas");
 const ctx=canvas.getContext("2d");
 
-ctx.fillStyle="#f3e5d7";
-ctx.fillRect(0,0,900,350);
-
-ctx.fillStyle="#e0c9a6";
-ctx.fillRect(0,350,900,150);
-
-const images=[
-{src:"photo1.jpg",x:80},
-{src:"photo3.jpg",x:620},
-{src:"photo4.jpg",x:780}
-];
-
-// วิดีโอตรงกลาง
 const video=document.createElement("video");
 video.src="video.mp4";
 video.autoplay=true;
 video.loop=true;
 video.muted=true;
 video.play();
+
+for(let i=0;i<40;i++){
+rosePetals.push({
+x:Math.random()*900,
+y:Math.random()*500,
+speed:1+Math.random()*2,
+rot:Math.random()*360
+});
+}
+
+function animate(){
+
+ctx.clearRect(0,0,900,500);
+
+ctx.fillStyle="#1a1a1a";
+ctx.fillRect(0,0,900,350);
+
+ctx.fillStyle="#2c2c2c";
+ctx.fillRect(0,350,900,150);
+
+drawFrame(ctx,100,"photo1.jpg");
+drawFrame(ctx,650,"photo3.jpg");
+drawFrame(ctx,800,"photo4.jpg");
+
+drawVideo();
+drawPeople(ctx);
+drawShadows(ctx);
+drawPetals(ctx);
+
+requestAnimationFrame(animate);
+}
+
+function drawFrame(ctx,x,src){
+const img=new Image();
+img.src=src;
+ctx.fillStyle="#4e342e";
+ctx.fillRect(x-5,60,110,130);
+ctx.drawImage(img,x,65,100,120);
+drawLight(ctx,x+50);
+}
 
 function drawVideo(){
 ctx.fillStyle="#4e342e";
@@ -58,101 +134,56 @@ drawLight(ctx,450);
 ctx.drawImage(video,360,65,190,120);
 }
 
-// สร้างกลีบกุหลาบ
-for(let i=0;i<30;i++){
-rosePetals.push({
-x:Math.random()*900,
-y:Math.random()*500,
-speed:1+Math.random()*2
-});
-}
-
-function animate(){
-
-ctx.clearRect(0,0,900,500);
-
-ctx.fillStyle="#f3e5d7";
-ctx.fillRect(0,0,900,350);
-
-ctx.fillStyle="#e0c9a6";
-ctx.fillRect(0,350,900,150);
-
-drawVideo();
-
-images.forEach(data=>{
-const img=new Image();
-img.src=data.src;
-ctx.fillStyle="#4e342e";
-ctx.fillRect(data.x-5,60,110,130);
-ctx.drawImage(img,data.x,65,100,120);
-drawLight(ctx,data.x+50);
-});
-
-drawPeople(ctx);
-drawShadows(ctx);
-drawPetals(ctx);
-
-requestAnimationFrame(animate);
-}
-
 animate();
 }
 
 function drawLight(ctx,x){
-ctx.fillStyle="rgba(255,255,200,0.3)";
+const g=ctx.createLinearGradient(x,0,x,100);
+g.addColorStop(0,"rgba(255,255,200,0.5)");
+g.addColorStop(1,"rgba(255,255,200,0)");
+ctx.fillStyle=g;
 ctx.beginPath();
 ctx.moveTo(x,0);
-ctx.lineTo(x-60,60);
-ctx.lineTo(x+60,60);
+ctx.lineTo(x-80,100);
+ctx.lineTo(x+80,100);
 ctx.fill();
 }
 
 function drawPeople(ctx){
 const people=[120,200,300,400,500,600,700,800];
 people.forEach(x=>{
-ctx.strokeStyle="#222";
-ctx.lineWidth=4;
-
-ctx.beginPath();
-ctx.moveTo(x,420);
-ctx.lineTo(x-6,440);
-ctx.moveTo(x,420);
-ctx.lineTo(x+6,440);
-ctx.stroke();
-
-ctx.beginPath();
-ctx.moveTo(x,390);
-ctx.lineTo(x,420);
-ctx.stroke();
-
-ctx.beginPath();
-ctx.moveTo(x-10,400);
-ctx.lineTo(x+10,400);
-ctx.stroke();
-
-ctx.fillStyle="#111";
+ctx.fillStyle="#000";
 ctx.beginPath();
 ctx.arc(x,380,10,0,Math.PI*2);
 ctx.fill();
+ctx.fillRect(x-3,390,6,35);
 });
 }
 
 function drawShadows(ctx){
 const people=[120,200,300,400,500,600,700,800];
 people.forEach(x=>{
-ctx.fillStyle="rgba(0,0,0,0.2)";
+ctx.fillStyle="rgba(0,0,0,0.3)";
 ctx.beginPath();
-ctx.ellipse(x,450,20,6,0,0,Math.PI*2);
+ctx.ellipse(x,450,25,8,0,0,Math.PI*2);
 ctx.fill();
 });
 }
 
 function drawPetals(ctx){
-ctx.fillStyle="red";
 rosePetals.forEach(p=>{
+ctx.save();
+ctx.translate(p.x,p.y);
+ctx.rotate(p.rot);
+
+ctx.fillStyle="#c2185b";
 ctx.beginPath();
-ctx.arc(p.x,p.y,4,0,Math.PI*2);
+ctx.moveTo(0,0);
+ctx.bezierCurveTo(5,-8,12,-8,10,0);
+ctx.bezierCurveTo(12,8,5,8,0,0);
 ctx.fill();
+
+ctx.restore();
 
 p.y+=p.speed;
 if(p.y>500){
@@ -161,7 +192,7 @@ p.x=Math.random()*900;
 }
 });
 }
-</script>
 
+</script>
 </body>
 </html>
