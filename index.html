@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple 2D Gallery</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
+        canvas { display: block; background: #f0f0f0; margin: 20px auto; border: 10px solid #333; }
+        .instructions { color: white; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="instructions">ใช้ปุ่มลูกศร หรือ W A S D ในการเดิน</div>
+    <canvas id="galleryCanvas" width="800" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('galleryCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // ข้อมูลตัวละคร
+        const player = {
+            x: 400, y: 300, size: 30, color: '#ff5722', speed: 5
+        };
+
+        // ข้อมูลรูปภาพในแกลเลอรี
+        const paintings = [
+            { x: 100, y: 50, w: 80, h: 100, color: '#3498db', title: 'Blue Ocean' },
+            { x: 350, y: 50, w: 80, h: 100, color: '#e74c3c', title: 'Sunset' },
+            { x: 600, y: 50, w: 80, h: 100, color: '#f1c40f', title: 'Desert' }
+        ];
+
+        const keys = {};
+
+        // ตรวจจับการกดปุ่ม
+        window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+        function update() {
+            // ควบคุมการเดิน
+            if (keys['w'] || keys['arrowup']) player.y -= player.speed;
+            if (keys['s'] || keys['arrowdown']) player.y += player.speed;
+            if (keys['a'] || keys['arrowleft']) player.x -= player.speed;
+            if (keys['d'] || keys['arrowright']) player.x += player.speed;
+
+            draw();
+            requestAnimationFrame(update);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // วาดรูปภาพและกรอบ
+            paintings.forEach(art => {
+                // วาดกรอบรูป (Frame)
+                ctx.fillStyle = '#3d2b1f';
+                ctx.fillRect(art.x - 5, art.y - 5, art.w + 10, art.h + 10);
+                
+                // วาดภาพ (ในที่นี้ใช้สีแทนภาพ)
+                ctx.fillStyle = art.color;
+                ctx.fillRect(art.x, art.y, art.w, art.h);
+                
+                // ตรวจสอบระยะห่าง (Interaction)
+                const dist = Math.hypot(player.x - (art.x + art.w/2), player.y - (art.y + art.h/2));
+                if (dist < 80) {
+                    ctx.fillStyle = 'black';
+                    ctx.fillText(art.title, art.x, art.y - 15);
+                }
+            });
+
+            // วาดตัวละคร
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.size/2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        update();
+    </script>
+</body>
+</html>
