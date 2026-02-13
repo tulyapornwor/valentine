@@ -5,22 +5,29 @@
 <title>Museum of Us</title>
 
 <style>
+
 body{
 margin:0;
-background:black;
-color:white;
+background:#000;
 font-family:sans-serif;
+color:white;
+text-align:center;
 overflow:hidden;
 }
 
-.screen{
+/* หน้า intro */
+#intro,#endScreen{
 position:absolute;
+top:0;
+left:0;
 width:100%;
 height:100%;
 display:flex;
+flex-direction:column;
 justify-content:center;
 align-items:center;
-flex-direction:column;
+background:#000;
+z-index:10;
 }
 
 button{
@@ -32,53 +39,69 @@ border-radius:10px;
 cursor:pointer;
 }
 
-#museum{display:none;}
+#gallery{
+display:none;
+}
 
 canvas{
 display:block;
 margin:auto;
 background:#111;
-box-shadow:0 0 80px rgba(255,255,255,0.1);
+box-shadow:0 0 120px rgba(255,255,255,0.1);
 }
+
 </style>
 </head>
 
 <body>
 
-<div id="start" class="screen">
-<h1>ก่อนเข้าพิพิธภัณฑ์...</h1>
-<h2>เรายังรักกันไหม?</h2>
-<div>
-<button onclick="yes()">YES ❤️</button>
-<button onclick="no()">NO 😡</button>
-</div>
+<div id="intro">
+<h1>Happy Valentine Day</h1>
+<h2>รักกันไหม 💖</h2>
+<button onclick="enterMuseum(true)">YES</button>
+<button onclick="enterMuseum(false)">NO</button>
 <p id="angry"></p>
 </div>
 
-<div id="museum" class="screen">
+<div id="gallery">
 <canvas id="galleryCanvas" width="900" height="500"></canvas>
+</div>
+
+<div id="endScreen" style="display:none;">
+<h1>ขอบคุณที่เดินผ่านทุกช่วงเวลาด้วยกัน 💖</h1>
+<img src="flowers.png" width="300">
+<h2>รักเธอที่สุดในโลก 🌹</h2>
 </div>
 
 <script>
 
-function yes(){
-document.getElementById("start").style.display="none";
-document.getElementById("museum").style.display="flex";
-drawGallery();
-}
-
-function no(){
-document.getElementById("angry").innerHTML="😡 ลองตอบใหม่อีกที!";
-document.body.style.animation="shake 0.3s";
-setTimeout(()=>document.body.style.animation="",300);
-}
-
 let rosePetals=[];
+let showEnd=false;
+
+function enterMuseum(ans){
+if(!ans){
+document.getElementById("angry").innerText="😡 ต้องตอบ YES เท่านั้น!";
+return;
+}
+document.getElementById("intro").style.display="none";
+document.getElementById("gallery").style.display="block";
+drawGallery();
+setTimeout(()=>{
+document.getElementById("gallery").style.display="none";
+document.getElementById("endScreen").style.display="flex";
+},35000);
+}
 
 function drawGallery(){
 
 const canvas=document.getElementById("galleryCanvas");
 const ctx=canvas.getContext("2d");
+
+const images=[
+{src:"photo1.jpg",x:80},
+{src:"photo3.jpg",x:620},
+{src:"photo4.jpg",x:760}
+];
 
 const video=document.createElement("video");
 video.src="video.mp4";
@@ -96,101 +119,88 @@ rot:Math.random()*360
 });
 }
 
+function drawFrame(x,src){
+
+const img=new Image();
+img.src=src;
+
+img.onload=function(){
+
+const maxW=220;
+const maxH=260;
+
+let w=img.width;
+let h=img.height;
+
+const ratio=Math.min(maxW/w,maxH/h);
+w*=ratio;
+h*=ratio;
+
+ctx.fillStyle="#4e342e";
+ctx.fillRect(x-15,50,w+30,h+30);
+
+ctx.drawImage(img,x,65,w,h);
+
+drawLight(x+(w/2));
+};
+}
+
 function animate(){
 
 ctx.clearRect(0,0,900,500);
 
-ctx.fillStyle="#1a1a1a";
+ctx.fillStyle="#f3e5d7";
 ctx.fillRect(0,0,900,350);
 
-ctx.fillStyle="#2c2c2c";
+ctx.fillStyle="#e0c9a6";
 ctx.fillRect(0,350,900,150);
 
-drawFrame(ctx,100,"photo1.jpg");
-drawFrame(ctx,650,"photo3.jpg");
-drawFrame(ctx,800,"photo4.jpg");
+images.forEach(data=>{
+drawFrame(data.x,data.src);
+});
 
-drawVideo();
-drawPeople(ctx);
-drawShadows(ctx);
-drawPetals(ctx);
+ctx.fillStyle="#4e342e";
+ctx.fillRect(330,45,240,170);
+drawLight(450);
+ctx.drawImage(video,340,55,220,150);
+
+drawPetals();
 
 requestAnimationFrame(animate);
 }
 
-function drawFrame(ctx,x,src){
-const img=new Image();
-img.src=src;
-ctx.fillStyle="#4e342e";
-ctx.fillRect(x-5,60,110,130);
-ctx.drawImage(img,x,65,100,120);
-drawLight(ctx,x+50);
-}
-
-function drawVideo(){
-ctx.fillStyle="#4e342e";
-ctx.fillRect(350,55,210,140);
-drawLight(ctx,450);
-ctx.drawImage(video,360,65,190,120);
-}
-
-animate();
-}
-
-function drawLight(ctx,x){
-const g=ctx.createLinearGradient(x,0,x,100);
-g.addColorStop(0,"rgba(255,255,200,0.5)");
-g.addColorStop(1,"rgba(255,255,200,0)");
-ctx.fillStyle=g;
+function drawLight(x){
+ctx.fillStyle="rgba(255,255,200,0.2)";
 ctx.beginPath();
 ctx.moveTo(x,0);
-ctx.lineTo(x-80,100);
-ctx.lineTo(x+80,100);
+ctx.lineTo(x-80,60);
+ctx.lineTo(x+80,60);
 ctx.fill();
 }
 
-function drawPeople(ctx){
-const people=[120,200,300,400,500,600,700,800];
-people.forEach(x=>{
-ctx.fillStyle="#000";
-ctx.beginPath();
-ctx.arc(x,380,10,0,Math.PI*2);
-ctx.fill();
-ctx.fillRect(x-3,390,6,35);
-});
-}
+function drawPetals(){
+ctx.fillStyle="red";
 
-function drawShadows(ctx){
-const people=[120,200,300,400,500,600,700,800];
-people.forEach(x=>{
-ctx.fillStyle="rgba(0,0,0,0.3)";
-ctx.beginPath();
-ctx.ellipse(x,450,25,8,0,0,Math.PI*2);
-ctx.fill();
-});
-}
-
-function drawPetals(ctx){
 rosePetals.forEach(p=>{
 ctx.save();
 ctx.translate(p.x,p.y);
 ctx.rotate(p.rot);
-
-ctx.fillStyle="#c2185b";
 ctx.beginPath();
-ctx.moveTo(0,0);
-ctx.bezierCurveTo(5,-8,12,-8,10,0);
-ctx.bezierCurveTo(12,8,5,8,0,0);
+ctx.ellipse(0,0,6,4,0,0,Math.PI*2);
 ctx.fill();
-
 ctx.restore();
 
 p.y+=p.speed;
+p.rot+=0.02;
+
 if(p.y>500){
 p.y=0;
 p.x=Math.random()*900;
 }
 });
+}
+
+animate();
 }
 
 </script>
