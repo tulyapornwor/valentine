@@ -1,3 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Museum of Us</title>
+
+<style>
+body{
+margin:0;
+background:black;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+canvas{
+box-shadow:0 0 40px rgba(255,255,255,0.2);
+}
+</style>
+</head>
+
+<body onload="drawGallery()">
+
+<canvas id="galleryCanvas" width="900" height="500"></canvas>
+
 <script>
 let rosePetals=[];
 
@@ -18,21 +43,6 @@ const images=[
 {src:"photo4.jpg",x:780}
 ];
 
-images.forEach(data=>{
-const img=new Image();
-img.src=data.src;
-
-img.onload=function(){
-
-drawLight(ctx,data.x+50);
-
-ctx.fillStyle="#4e342e";
-ctx.fillRect(data.x-5,60,110,130);
-
-ctx.drawImage(img,data.x,65,100,120);
-};
-});
-
 // วิดีโอตรงกลาง
 const video=document.createElement("video");
 video.src="video.mp4";
@@ -44,9 +54,7 @@ video.play();
 function drawVideo(){
 ctx.fillStyle="#4e342e";
 ctx.fillRect(350,55,210,140);
-
 drawLight(ctx,450);
-
 ctx.drawImage(video,360,65,190,120);
 }
 
@@ -101,7 +109,6 @@ ctx.fill();
 
 function drawPeople(ctx){
 const people=[120,200,300,400,500,600,700,800];
-
 people.forEach(x=>{
 ctx.strokeStyle="#222";
 ctx.lineWidth=4;
@@ -132,7 +139,6 @@ ctx.fill();
 
 function drawShadows(ctx){
 const people=[120,200,300,400,500,600,700,800];
-
 people.forEach(x=>{
 ctx.fillStyle="rgba(0,0,0,0.2)";
 ctx.beginPath();
@@ -143,7 +149,6 @@ ctx.fill();
 
 function drawPetals(ctx){
 ctx.fillStyle="red";
-
 rosePetals.forEach(p=>{
 ctx.beginPath();
 ctx.arc(p.x,p.y,4,0,Math.PI*2);
